@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WonderMayank Drinks — Cocktail Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700;800;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF6B9D;
+    --pink-light: #FFB3CF;
+    --pink-pale: #FFF0F5;
+    --red: #E8344A;
+    --red-coral: #FF4D6D;
+    --mint: #A8EDCA;
+    --mint-dark: #3DB88A;
+    --yellow: #FFE08A;
+    --yellow-dark: #F5C400;
+    --lavender: #D8B4FE;
+    --lavender-dark: #7C3AED;
+    --cream: #FFFDF7;
+    --dark: #1A1A2E;
+    --text: #2D2D2D;
+    --text-muted: #888;
+    --border: #F0F0F0;
+    --white: #FFFFFF;
+    --shadow: 0 8px 32px rgba(0,0,0,0.08);
+    --shadow-hover: 0 16px 48px rgba(0,0,0,0.14);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ══════════════════════════════════
+     LOADING SCREEN
+  ══════════════════════════════════ */
+  #loading-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF4D6D 40%, #FFB347 100%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #loading-screen.fade-out {
+    opacity: 0;
+    transform: scale(1.05);
+    pointer-events: none;
+  }
+
+  .loading-can-wrap {
+    position: relative;
+    width: 130px;
+    animation: canBounce 1.2s ease-in-out infinite;
+  }
+
+  @keyframes canBounce {
+    0%, 100% { transform: translateY(0px) rotate(-3deg); }
+    50% { transform: translateY(-18px) rotate(3deg); }
+  }
+
+  .loading-can-img {
+    width: 130px;
+    height: auto;
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+  }
+
+  .loading-bubbles {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+  }
+
+  .bubble {
+    width: 10px;
+    height: 10px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    animation: bubbleFloat 1.5s ease-in-out infinite;
+  }
+  .bubble:nth-child(2) { animation-delay: 0.3s; width: 7px; height: 7px; }
+  .bubble:nth-child(3) { animation-delay: 0.6s; width: 5px; height: 5px; }
+
+  @keyframes bubbleFloat {
+    0% { opacity: 0; transform: translateY(0); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-30px); }
+  }
+
+  .loading-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.4rem;
+    color: white;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    letter-spacing: 1px;
+  }
+
+  .loading-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .loading-bar-wrap {
+    width: 200px;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .loading-bar {
+    height: 100%;
+    background: white;
+    border-radius: 99px;
+    animation: loadBar 2.4s ease-out forwards;
+  }
+
+  @keyframes loadBar {
+    0% { width: 0%; }
+    60% { width: 70%; }
+    100% { width: 100%; }
+  }
+
+  .loading-tagline {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    font-style: italic;
+  }
+
+  /* ══════════════════════════════════
+     ANNOUNCEMENT BAR
+  ══════════════════════════════════ */
+  .announcement-bar {
+    background: var(--red);
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .announcement-bar .socials {
+    position: absolute;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .announcement-bar .socials a {
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .announcement-bar .socials a:hover { opacity: 1; }
+
+  /* ══════════════════════════════════
+     NAVBAR
+  ══════════════════════════════════ */
+  .navbar {
+    background: white;
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+  }
+
+  .nav-logo {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.8rem;
+    color: var(--red);
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+  .nav-logo:hover { transform: scale(1.05); }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    align-items: center;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--red); }
+
+  .nav-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .nav-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--text);
+    transition: color 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  .nav-icon-btn:hover { color: var(--red); transform: scale(1.1); }
+
+  .saved-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--red);
+    color: white;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    min-width: 18px;
+    text-align: center;
+    display: none;
+  }
+
+  /* ══════════════════════════════════
+     HERO
+  ══════════════════════════════════ */
+  .hero {
+    position: relative;
+    min-height: 460px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .hero-fallback {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF4D6D 40%, #FFB347 80%, #FFE08A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-anime-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 48px 60px;
+    max-width: 620px;
+  }
+
+  .hero-content h1 {
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+  }
+
+  .hero-btn {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    padding: 14px 32px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 6px 20px rgba(232,52,74,0.4);
+  }
+
+  .hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(232,52,74,0.5);
+    background: #c9273e;
+  }
+
+  /* ══════════════════════════════════
+     FEATURED CANS SECTION
+  ══════════════════════════════════ */
+  .featured-section {
+    padding: 80px 60px 60px;
+    text-align: center;
+    background: white;
+  }
+
+  .featured-cans {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .featured-can-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+
+  .featured-can-item:hover { transform: translateY(-8px); }
+
+  .can-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+  }
+
+  .can-circle-img {
+    width: 130px;
+    height: auto;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15));
+    transition: transform 0.3s;
+  }
+
+  .featured-can-item:hover .can-circle-img {
+    transform: scale(1.08) rotate(-3deg);
+  }
+
+  .can-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .featured-tagline {
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  /* ══════════════════════════════════
+     BADGES STRIP
+  ══════════════════════════════════ */
+  .badges-strip {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 24px 40px;
+    background: var(--cream);
+  }
+
+  .badge-pill {
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border: 2px solid;
+  }
+
+  .badge-pink { background: var(--pink-pale); color: var(--red); border-color: var(--pink); }
+  .badge-mint { background: #E8FFF5; color: var(--mint-dark); border-color: var(--mint); }
+  .badge-yellow { background: #FFFBEA; color: #856B00; border-color: var(--yellow-dark); }
+  .badge-lavender { background: #F5F0FF; color: var(--lavender-dark); border-color: var(--lavender); }
+  .badge-coral { background: #FFF3F0; color: #C0392B; border-color: #FF8A80; }
+
+  /* ══════════════════════════════════
+     SEARCH + FILTERS
+  ══════════════════════════════════ */
+  .search-section {
+    padding: 48px 60px 36px;
+    background: white;
+  }
+
+  .search-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .search-bar-wrap {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 240px;
+    padding: 16px 24px;
+    border: 2px solid var(--border);
+    border-radius: 99px;
+    font-size: 0.95rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--cream);
+  }
+
+  .search-input:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 4px rgba(232,52,74,0.1);
+  }
+
+  .search-btn {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.25s;
+    letter-spacing: 0.5px;
+  }
+
+  .search-btn:hover {
+    background: #c9273e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(232,52,74,0.35);
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .filter-chip {
+    padding: 8px 18px;
+    border-radius: 99px;
+    border: 2px solid var(--border);
+    background: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-muted);
+  }
+
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--red);
+    background: var(--pink-pale);
+    color: var(--red);
+  }
+
+  .sort-select {
+    padding: 10px 18px;
+    border: 2px solid var(--border);
+    border-radius: 99px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    background: white;
+    color: var(--text-muted);
+    transition: border-color 0.2s;
+  }
+
+  .sort-select:focus { border-color: var(--red); }
+
+  /* ══════════════════════════════════
+     RESULTS GRID
+  ══════════════════════════════════ */
+  .results-section {
+    padding: 0 60px 60px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .results-count {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .view-toggle {
+    display: flex;
+    gap: 8px;
+  }
+
+  .view-btn {
+    background: var(--border);
+    border: none;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: var(--text-muted);
+  }
+
+  .view-btn.active {
+    background: var(--red);
+    color: white;
+  }
+
+  .drinks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .drinks-grid.list-view {
+    grid-template-columns: 1fr;
+  }
+
+  /* ══════════════════════════════════
+     DRINK CARD
+  ══════════════════════════════════ */
+  .drink-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+  }
+
+  .drink-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--pink-light);
+  }
+
+  .drink-card.list-view {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .card-img-wrap {
+    position: relative;
+    overflow: hidden;
+    background: var(--pink-pale);
+  }
+
+  .drink-card:nth-child(3n+1) .card-img-wrap { background: #FFE8EE; }
+  .drink-card:nth-child(3n+2) .card-img-wrap { background: #E8FFF5; }
+  .drink-card:nth-child(3n+3) .card-img-wrap { background: #FFFBEA; }
+  .drink-card:nth-child(4n) .card-img-wrap { background: #F5F0FF; }
+
+  .card-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.4s;
+    display: block;
+  }
+
+  .drink-card:hover .card-img { transform: scale(1.06); }
+
+  .drink-card.list-view .card-img-wrap {
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  .drink-card.list-view .card-img {
+    height: 100px;
+  }
+
+  .card-save-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: all 0.25s;
+    z-index: 5;
+  }
+
+  .card-save-btn:hover { transform: scale(1.15); }
+  .card-save-btn.saved { background: var(--pink-pale); }
+
+  .category-tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--red);
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+
+  .card-body {
+    padding: 18px 20px 20px;
+  }
+
+  .drink-card.list-view .card-body {
+    padding: 16px 20px;
+    flex: 1;
+  }
+
+  .card-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .card-glass {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .mini-tag {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: var(--border);
+    color: var(--text-muted);
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-view {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid var(--red);
+    background: transparent;
+    color: var(--red);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-view:hover {
+    background: var(--red);
+    color: white;
+  }
+
+  /* ══════════════════════════════════
+     SKELETON LOADING
+  ══════════════════════════════════ */
+  .skeleton-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .skeleton-img {
+    width: 100%;
+    height: 220px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .skeleton-body { padding: 18px 20px; }
+
+  .skeleton-line {
+    height: 14px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 10px;
+  }
+
+  .skeleton-line.short { width: 60%; }
+  .skeleton-line.shorter { width: 40%; }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ══════════════════════════════════
+     MODAL
+  ══════════════════════════════════ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 28px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s;
+    scrollbar-width: thin;
+    scrollbar-color: var(--pink) transparent;
+  }
+
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+  .modal-hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 220px;
+    max-height: 360px;
+    overflow: hidden;
+    border-radius: 28px 28px 0 0;
+    background: #FFE8EE;
+    flex-shrink: 0;
+  }
+
+  .modal-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10;
+    transition: transform 0.2s;
+  }
+
+  .modal-close:hover { transform: rotate(90deg) scale(1.1); }
+
+  .modal-save-btn {
+    position: absolute;
+    top: 16px;
+    right: 64px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.2s;
+  }
+
+  .modal-save-btn.saved { background: var(--pink-pale); }
+
+  .modal-body {
+    padding: 28px 32px;
+  }
+
+  .modal-cat-tag {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+  }
+
+  .modal-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .modal-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .modal-meta-item {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .modal-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .ingredients-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .ingredient-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .ingredient-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .ingredient-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .ingredient-measure {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .instructions-box {
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    border-left: 4px solid var(--red);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .similar-drinks {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--pink) transparent;
+  }
+
+  .similar-card {
+    flex-shrink: 0;
+    width: 120px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .similar-card:hover { transform: translateY(-4px); }
+
+  .similar-img {
+    width: 120px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 6px;
+  }
+
+  .similar-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* ══════════════════════════════════
+     SAVED DRAWER
+  ══════════════════════════════════ */
+  .saved-drawer {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    z-index: 600;
+    box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .saved-drawer.open { right: 0; }
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 599;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s;
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer-header {
+    padding: 24px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .drawer-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .drawer-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  .drawer-close:hover { color: var(--red); }
+
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--pink) transparent;
+  }
+
+  .drawer-empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+  }
+
+  .drawer-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .drawer-empty-text { font-size: 0.9rem; line-height: 1.6; }
+
+  .saved-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    background: var(--cream);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .saved-item:hover {
+    background: var(--pink-pale);
+    transform: translateX(-4px);
+  }
+
+  .saved-item-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .saved-item-info { flex: 1; }
+
+  .saved-item-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .saved-item-cat {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .saved-item-remove {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s;
+    padding: 6px;
+  }
+
+  .saved-item-remove:hover { color: var(--red); }
+
+  .drawer-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .clear-all-btn {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .clear-all-btn:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  /* ══════════════════════════════════
+     LOAD MORE
+  ══════════════════════════════════ */
+  .load-more-wrap {
+    text-align: center;
+    padding: 32px 0 48px;
+  }
+
+  .load-more-btn {
+    background: transparent;
+    border: 3px solid var(--red);
+    color: var(--red);
+    padding: 14px 48px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.25s;
+    letter-spacing: 0.5px;
+  }
+
+  .load-more-btn:hover {
+    background: var(--red);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(232,52,74,0.35);
+  }
+
+  /* ══════════════════════════════════
+     RANDOM COCKTAIL SECTION
+  ══════════════════════════════════ */
+  .random-section {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF4D6D 100%);
+    padding: 60px;
+    text-align: center;
+    margin: 0 0 0 0;
+  }
+
+  .random-section h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .random-section p {
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 28px;
+    font-size: 0.95rem;
+  }
+
+  .random-btn {
+    background: white;
+    color: var(--red);
+    border: none;
+    padding: 16px 40px;
+    border-radius: 99px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.25s;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    letter-spacing: 0.5px;
+  }
+
+  .random-btn:hover {
+    transform: scale(1.06) translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+  }
+
+  /* ══════════════════════════════════
+     TOAST
+  ══════════════════════════════════ */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--dark);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 700;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ══════════════════════════════════
+     FOOTER
+  ══════════════════════════════════ */
+  .footer {
+    background: var(--dark);
+    color: white;
+    padding: 60px 60px 36px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+
+  .footer-brand { }
+
+  .footer-logo {
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    color: var(--pink);
+    margin-bottom: 12px;
+    display: block;
+    text-decoration: none;
+  }
+
+  .footer-tagline {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 280px;
+  }
+
+  .footer-col-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 16px;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    text-decoration: none;
+    color: rgba(255,255,255,0.65);
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    font-weight: 500;
+  }
+
+  .footer-links a:hover { color: var(--pink); }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-copy {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .footer-copy a {
+    color: var(--pink);
+    text-decoration: none;
+  }
+
+  .footer-socials {
+    display: flex;
+    gap: 12px;
+  }
+
+  .footer-social-link {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+
+  .footer-social-link:hover {
+    background: var(--red);
+    color: white;
+    transform: translateY(-3px);
+  }
+
+  /* ══════════════════════════════════
+     ERROR STATE
+  ══════════════════════════════════ */
+  .error-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--text-muted);
+  }
+
+  .error-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .error-title { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .error-msg { font-size: 0.88rem; line-height: 1.6; max-width: 360px; margin: 0 auto 20px; }
+
+  /* ══════════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════════ */
+  @media (max-width: 900px) {
+    .navbar { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .hero-content { padding: 36px 24px; }
+    .hero-content h1 { font-size: 2.2rem; }
+    .featured-section { padding: 48px 24px; }
+    .featured-cans { gap: 28px; }
+    .can-circle { width: 140px; height: 140px; }
+    .can-circle-img { width: 90px; }
+    .search-section { padding: 36px 20px 24px; }
+    .results-section { padding: 0 20px 48px; }
+    .random-section { padding: 48px 24px; }
+    .footer { padding: 48px 24px 28px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .saved-drawer { width: 100%; right: -100%; }
+    .modal-body { padding: 20px; }
+  }
+
+  @media (max-width: 600px) {
+    .featured-cans { gap: 16px; }
+    .can-circle { width: 110px; height: 110px; }
+    .can-circle-img { width: 72px; }
+    .drinks-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .card-img { height: 160px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .hero { min-height: 340px; }
+    .hero-content h1 { font-size: 1.7rem; }
+    .random-section h2 { font-size: 1.5rem; }
+    .announcement-bar .socials { display: none; }
+  }
+
+  /* Scrollbar global */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 99px; }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .no-results-icon { font-size: 3rem; margin-bottom: 12px; }
+  .no-results-text { font-size: 1rem; font-weight: 600; }
+  .no-results-sub { font-size: 0.85rem; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loading-can-wrap">
+    <div class="loading-bubbles">
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+    </div>
+    <img src="can1.png" class="loading-can-img" alt="drink can" onerror="this.style.display='none';document.getElementById('fallback-can').style.display='block'">
+    <div id="fallback-can" style="display:none;">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+    </div>
+  </div>
+  <div class="loading-title">WonderMayank Drinks</div>
+  <div class="loading-subtitle">Shaking the perfect cocktail...</div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  <div class="loading-tagline">Fun. Fresh. Fizzy.</div>
+</div>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar" style="position:relative;">
+  <span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/><path d="M18.37 2.63 14 7l-2 5 5-2 4.37-4.37a2.12 2.12 0 1 0-3-3Z"/><line x1="10" y1="14" x2="18.37" y2="5.63"/></svg>
+    DISCOVER 10,000+ COCKTAIL RECIPES — SHAKE THINGS UP!
+  </span>
+  <div class="socials">
+    <a href="https://wondermayank.github.io/" title="WonderMayank">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </a>
+    <a href="https://commercesehoga.github.io/dashboard" title="ThunderStudy">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="#" class="nav-logo">WonderDrinks</a>
+  <ul class="nav-links">
+    <li><a href="#search-section" onclick="scrollToSearch(); return false;">SHOP</a></li>
+    <li><a href="#" onclick="openRandomCocktail(); return false;">RANDOM</a></li>
+    <li><a href="#search-section" onclick="scrollToSearch(); return false;">CATEGORIES</a></li>
+    <li><a href="https://wondermayank.github.io/contact" target="_blank">CONTACT</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="nav-icon-btn" onclick="toggleSavedDrawer()" title="Saved Cocktails">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span class="saved-badge" id="saved-badge">0</span>
+    </button>
+    <button class="nav-icon-btn" onclick="scrollToSearch()" title="Search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-fallback">
+    <img src="top.png" class="hero-anime-img" alt="Drinks Hero"
+      onerror="this.style.display='none'">
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>DRINK<br>#WONDERMAYANK</h1>
+    <button class="hero-btn" onclick="scrollToSearch()">SHOW ME EVERYTHING!</button>
+  </div>
+</section>
+
+<!-- FEATURED CANS -->
+<section class="featured-section">
+  <div class="featured-cans">
+    <div class="featured-can-item" onclick="filterByCategory('Cocktail')">
+      <div class="can-circle" style="background:#FFE8EE;">
+        <img src="can1.png" class="can-circle-img" alt="Cocktail"
+          onerror="this.outerHTML='<div style=\'font-size:4rem;\'>🍸</div>'">
+      </div>
+      <span class="can-label">Cocktail</span>
+    </div>
+    <div class="featured-can-item" onclick="filterByCategory('Shot')">
+      <div class="can-circle" style="background:#E8FFF5;">
+        <img src="can2.png" class="can-circle-img" alt="Shot"
+          onerror="this.outerHTML='<div style=\'font-size:4rem;\'>🥃</div>'">
+      </div>
+      <span class="can-label">Shot</span>
+    </div>
+    <div class="featured-can-item" onclick="filterByCategory('Non alcoholic')">
+      <div class="can-circle" style="background:#FFFBEA;">
+        <img src="can3.png" class="can-circle-img" alt="Non Alcoholic"
+          onerror="this.outerHTML='<div style=\'font-size:4rem;\'>🧃</div>'">
+      </div>
+      <span class="can-label">Non Alcoholic</span>
+    </div>
+  </div>
+  <div class="featured-tagline">FUN. FRESH. FIZZY.</div>
+  <div class="badges-strip" style="padding:0;justify-content:center;flex-wrap:wrap;gap:10px;">
+    <span class="badge-pill badge-pink">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+      Virgin Options
+    </span>
+    <span class="badge-pill badge-mint">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M12 22V2M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
+      Classic Recipes
+    </span>
+    <span class="badge-pill badge-yellow">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-1px;margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Easy to Make
+    </span>
+    <span class="badge-pill badge-lavender">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Fruity Blends
+    </span>
+    <span class="badge-pill badge-coral">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10"/><path d="M12 8v4l3 3"/></svg>
+      Trending Now
+    </span>
+  </div>
+</section>
+
+<!-- SEARCH SECTION -->
+<section class="search-section" id="search-section">
+  <div class="search-title">Find Your Perfect Cocktail
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-4px;margin-left:8px;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+  </div>
+  <div class="search-bar-wrap">
+    <input type="text" class="search-input" id="search-input"
+      placeholder="Search cocktails, ingredients..."
+      oninput="handleSearchInput()"
+      onkeydown="if(event.key==='Enter') doSearch()">
+    <button class="search-btn" onclick="doSearch()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </button>
+    <button class="search-btn" style="background:transparent;color:var(--red);border:2px solid var(--red);" onclick="openRandomCocktail()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="8" cy="16" r="1.5" fill="currentColor"/><circle cx="16" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      Random
+    </button>
+  </div>
+  <div class="filter-row" id="category-filters">
+    <button class="filter-chip active" onclick="filterByCategory('all', this)">All</button>
+    <button class="filter-chip" onclick="filterByCategory('Ordinary Drink', this)">Ordinary</button>
+    <button class="filter-chip" onclick="filterByCategory('Cocktail', this)">Cocktail</button>
+    <button class="filter-chip" onclick="filterByCategory('Shot', this)">Shot</button>
+    <button class="filter-chip" onclick="filterByCategory('Coffee / Tea', this)">Coffee/Tea</button>
+    <button class="filter-chip" onclick="filterByCategory('Punch / Party Drink', this)">Party</button>
+    <button class="filter-chip" onclick="filterByCategory('Soft Drink', this)">Soft Drink</button>
+    <button class="filter-chip" onclick="filterByCategory('Beer', this)">Beer</button>
+    <button class="filter-chip" onclick="filterByCategory('Non alcoholic', this)">Non-Alcoholic</button>
+  </div>
+  <div class="filter-row">
+    <span style="font-size:0.8rem;font-weight:600;color:var(--text-muted);align-self:center;">Filter by glass:</span>
+    <button class="filter-chip" onclick="filterByGlass('all', this)" data-glass="all">All Glasses</button>
+    <button class="filter-chip" onclick="filterByGlass('Cocktail glass', this)" data-glass="cocktail">Cocktail Glass</button>
+    <button class="filter-chip" onclick="filterByGlass('Highball glass', this)" data-glass="highball">Highball</button>
+    <button class="filter-chip" onclick="filterByGlass('Shot glass', this)" data-glass="shot">Shot Glass</button>
+    <button class="filter-chip" onclick="filterByGlass('Martini Glass', this)" data-glass="martini">Martini</button>
+    <select class="sort-select" id="sort-select" onchange="sortDrinks(this.value)">
+      <option value="default">Sort: Default</option>
+      <option value="az">Name: A→Z</option>
+      <option value="za">Name: Z→A</option>
+    </select>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results-section">
+  <div class="results-header">
+    <span class="results-count" id="results-count">Loading cocktails...</span>
+    <div class="view-toggle">
+      <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="Grid view">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="view-btn" id="list-btn" onclick="setView('list')" title="List view">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drinks-grid" id="drinks-grid"></div>
+  <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
+    <button class="load-more-btn" onclick="loadMore()">Load More Cocktails</button>
+  </div>
+</section>
+
+<!-- RANDOM COCKTAIL CTA -->
+<section class="random-section">
+  <h2>Feeling Lucky?
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-4px;margin-left:6px;"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="8" cy="8" r="1.5" fill="white"/><circle cx="16" cy="16" r="1.5" fill="white"/><circle cx="8" cy="16" r="1.5" fill="white"/><circle cx="16" cy="8" r="1.5" fill="white"/><circle cx="12" cy="12" r="1.5" fill="white"/></svg>
+  </h2>
+  <p>Let us surprise you with a random cocktail recipe</p>
+  <button class="random-btn" onclick="openRandomCocktail()">SHAKE IT UP!</button>
+</section>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hero">
+      <img src="" alt="" class="modal-hero-img" id="modal-img">
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <button class="modal-save-btn" id="modal-save-btn" onclick="toggleSaveFromModal()">
+        <svg id="modal-save-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <span class="modal-cat-tag" id="modal-cat"></span>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-section-title">Ingredients</div>
+      <div class="ingredients-list" id="modal-ingredients"></div>
+      <div class="modal-section-title">Instructions</div>
+      <div class="instructions-box" id="modal-instructions"></div>
+      <div id="similar-section" style="display:none;">
+        <div class="modal-section-title" style="margin-top:24px;">Similar Drinks</div>
+        <div class="similar-drinks" id="similar-drinks"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SAVED DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="toggleSavedDrawer()"></div>
+<div class="saved-drawer" id="saved-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title" style="display:flex;align-items:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      Saved Cocktails
+    </span>
+    <button class="drawer-close" onclick="toggleSavedDrawer()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <div class="drawer-empty">
+      <div class="drawer-empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--pink-light)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      </div>
+      <div class="drawer-empty-text">No saved cocktails yet.<br>Tap the bookmark on any drink to save it here!</div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="clear-all-btn" onclick="clearAllSaved()" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      Clear All Saved
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="https://wondermayank.github.io/" class="footer-logo" target="_blank">WonderDrinks</a>
+      <p class="footer-tagline">Discover thousands of cocktail recipes powered by TheCocktailDB. Shake, sip & enjoy with WonderMayank.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Platform</div>
+      <ul class="footer-links">
+        <li><a href="https://wondermayank.github.io/" target="_blank">WonderMayank</a></li>
+        <li><a href="https://commercesehoga.github.io/dashboard" target="_blank">CBT Mock Platform</a></li>
+        <li><a href="https://commercesehoga.github.io/help" target="_blank">Support / Donate</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="https://wondermayank.github.io/terms" target="_blank">Terms of Use</a></li>
+        <li><a href="https://wondermayank.github.io/privacy" target="_blank">Privacy Policy</a></li>
+        <li><a href="https://wondermayank.github.io/disclaimer" target="_blank">Disclaimer</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Connect</div>
+      <ul class="footer-links">
+        <li><a href="https://wondermayank.github.io/contact" target="_blank">Contact Owner</a></li>
+        <li><a href="https://commercesehoga.github.io/help" target="_blank">Donation / Help</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 <a href="https://wondermayank.github.io/" target="_blank">WonderMayank</a> — Data from <a href="https://www.thecocktaildb.com/" target="_blank">TheCocktailDB</a></span>
+    <div class="footer-socials">
+      <a href="https://wondermayank.github.io/" class="footer-social-link" title="Website" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+      <a href="https://commercesehoga.github.io/dashboard" class="footer-social-link" title="ThunderStudy" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </a>
+      <a href="https://wondermayank.github.io/contact" class="footer-social-link" title="Contact" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script src="mocktails_db.js"></script>
+<script>
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+const API = 'https://www.thecocktaildb.com/api/json/v1/1';
+let allDrinks = [];
+let filteredDrinks = [];
+let displayedCount = 0;
+const PAGE_SIZE = 20;
+let currentView = 'grid';
+let savedDrinks = JSON.parse(localStorage.getItem('wonderdrinks_saved') || '[]');
+let currentCategory = 'all';
+let currentGlass = 'all';
+let currentSort = 'default';
+let currentModalDrink = null;
+let searchTimeout = null;
+
+
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+window.addEventListener('load', async () => {
+  // Simulate loading
+  await new Promise(r => setTimeout(r, 2600));
+  const ls = document.getElementById('loading-screen');
+  ls.classList.add('fade-out');
+  setTimeout(() => ls.style.display = 'none', 650);
+
+  updateSavedBadge();
+  await loadInitialDrinks();
+});
+
+// ══════════════════════════════════
+// API CALLS
+// ══════════════════════════════════
+async function fetchDrinksByLetter(letter) {
+  try {
+    const r = await fetch(`${API}/search.php?f=${letter}`);
+    const d = await r.json();
+    return d.drinks || [];
+  } catch { return []; }
+}
+
+async function searchDrinksByName(name) {
+  try {
+    const r = await fetch(`${API}/search.php?s=${encodeURIComponent(name)}`);
+    const d = await r.json();
+    return d.drinks || [];
+  } catch { return []; }
+}
+
+async function getDrinkById(id) {
+  try {
+    const r = await fetch(`${API}/lookup.php?i=${id}`);
+    const d = await r.json();
+    return d.drinks ? d.drinks[0] : null;
+  } catch { return null; }
+}
+
+async function getRandomDrink() {
+  try {
+    const r = await fetch(`${API}/random.php`);
+    const d = await r.json();
+    return d.drinks ? d.drinks[0] : null;
+  } catch { return null; }
+}
+
+async function filterByCategory(cat, el) {
+  currentCategory = cat;
+  currentGlass = 'all';
+
+  document.querySelectorAll('#category-filters .filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  showSkeletons();
+
+  if (cat === 'all') {
+    filteredDrinks = [...allDrinks];
+  } else if (cat === 'Non_Alcoholic') {
+    // Use local mocktail database — no API call needed
+    filteredDrinks = [...MOCKTAIL_DB];
+  } else {
+    try {
+      const r = await fetch(`${API}/filter.php?c=${encodeURIComponent(cat)}`);
+      const d = await r.json();
+      const stubs = d.drinks || [];
+
+      const cacheMap = {};
+      allDrinks.forEach(d => { cacheMap[d.idDrink] = d; });
+
+      const missingIds = stubs
+        .filter(s => !cacheMap[s.idDrink])
+        .map(s => s.idDrink);
+
+      if (missingIds.length) {
+        const fetched = await Promise.all(
+          missingIds.map(id =>
+            fetch(`${API}/lookup.php?i=${id}`)
+              .then(res => res.json())
+              .then(data => (data.drinks ? data.drinks[0] : null))
+              .catch(() => null)
+          )
+        );
+        fetched.forEach(fullDrink => {
+          if (!fullDrink) return;
+          cacheMap[fullDrink.idDrink] = fullDrink;
+          allDrinks.push(fullDrink);
+        });
+      }
+
+      filteredDrinks = stubs.map(s => cacheMap[s.idDrink] || s);
+    } catch {
+      filteredDrinks = allDrinks.filter(drink =>
+        (drink.strCategory || '').toLowerCase().includes(cat.toLowerCase())
+      );
+    }
+  }
+
+  applySortAndRender();
+  scrollToSearch();
+}
+
+async function filterByGlass(glass, el) {
+  currentGlass = glass;
+  document.querySelectorAll('[data-glass]').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  if (glass === 'all') {
+    filteredDrinks = currentCategory === 'all' ? [...allDrinks] : filteredDrinks;
+    applySortAndRender();
+    return;
+  }
+
+  showSkeletons();
+  try {
+    const r = await fetch(`${API}/filter.php?g=${encodeURIComponent(glass)}`);
+    const d = await r.json();
+    filteredDrinks = d.drinks || [];
+  } catch {
+    filteredDrinks = allDrinks.filter(drink =>
+      (drink.strGlass || '').toLowerCase().includes(glass.toLowerCase())
+    );
+  }
+  applySortAndRender();
+}
+
+// ══════════════════════════════════
+// LOAD INITIAL
+// ══════════════════════════════════
+async function loadInitialDrinks() {
+  showSkeletons();
+
+  // Load from multiple letters for variety
+  const letters = ['a','b','c','d','e','m','p','s','w'];
+  const batches = await Promise.all(letters.map(fetchDrinksByLetter));
+  allDrinks = batches.flat().filter(Boolean);
+  filteredDrinks = [...allDrinks];
+  applySortAndRender();
+}
+
+// ══════════════════════════════════
+// SEARCH
+// ══════════════════════════════════
+function handleSearchInput() {
+  clearTimeout(searchTimeout);
+  const val = document.getElementById('search-input').value.trim();
+  if (!val) {
+    filteredDrinks = [...allDrinks];
+    applySortAndRender();
+    return;
+  }
+  searchTimeout = setTimeout(() => doSearch(), 500);
+}
+
+async function doSearch() {
+  const val = document.getElementById('search-input').value.trim();
+  if (!val) return;
+
+  showSkeletons();
+  const results = await searchDrinksByName(val);
+  filteredDrinks = results;
+  currentCategory = 'all';
+  document.querySelectorAll('#category-filters .filter-chip').forEach((c, i) => {
+    c.classList.toggle('active', i === 0);
+  });
+  applySortAndRender();
+}
+
+// ══════════════════════════════════
+// SORT & RENDER
+// ══════════════════════════════════
+function sortDrinks(val) {
+  currentSort = val;
+  applySortAndRender();
+}
+
+function applySortAndRender() {
+  let drinks = [...filteredDrinks];
+
+  if (currentSort === 'az') {
+    drinks.sort((a, b) => (a.strDrink || '').localeCompare(b.strDrink || ''));
+  } else if (currentSort === 'za') {
+    drinks.sort((a, b) => (b.strDrink || '').localeCompare(a.strDrink || ''));
+  }
+
+  filteredDrinks = drinks;
+  displayedCount = 0;
+  renderDrinks(true);
+}
+
+function renderDrinks(reset = false) {
+  const grid = document.getElementById('drinks-grid');
+  if (reset) grid.innerHTML = '';
+
+  if (!filteredDrinks.length) {
+    grid.innerHTML = `
+      <div class="no-results">
+        <div class="no-results-icon">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--pink-light)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </div>
+        <div class="no-results-text">No cocktails found</div>
+        <div class="no-results-sub">Try a different search or category</div>
+      </div>`;
+    document.getElementById('results-count').textContent = '0 cocktails found';
+    document.getElementById('load-more-wrap').style.display = 'none';
+    return;
+  }
+
+  const slice = filteredDrinks.slice(displayedCount, displayedCount + PAGE_SIZE);
+  displayedCount += slice.length;
+
+  slice.forEach(drink => {
+    grid.appendChild(createDrinkCard(drink));
+  });
+
+  document.getElementById('results-count').textContent =
+    `Showing ${Math.min(displayedCount, filteredDrinks.length)} of ${filteredDrinks.length} cocktails`;
+
+  document.getElementById('load-more-wrap').style.display =
+    displayedCount < filteredDrinks.length ? 'block' : 'none';
+}
+
+function loadMore() {
+  renderDrinks(false);
+}
+
+const SVG_BOOKMARK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+const SVG_HEART_SAVED = `<svg width="15" height="15" viewBox="0 0 24 24" fill="var(--red)" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+const SVG_GLASS = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 2h8l-1 7H9L8 2z"/><path d="M9 9c0 0-1 3.5 3 6s3 7 3 7"/><path d="M15 9c0 0 1 3.5-3 6s-3 7-3 7"/><line x1="6" y1="22" x2="18" y2="22"/></svg>`;
+
+function createDrinkCard(drink) {
+  const isSaved = savedDrinks.some(s => s.idDrink === drink.idDrink);
+  const card = document.createElement('div');
+  card.className = `drink-card ${currentView === 'list' ? 'list-view' : ''}`;
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      <img class="card-img" src="${drink.strDrinkThumb}/preview" alt="${drink.strDrink}"
+        loading="lazy" onerror="this.src='https://placehold.co/300x220/FFE8EE/FF6B9D?text=No+Image'">
+      <span class="category-tag">${drink.strCategory || drink.strAlcoholic || 'Cocktail'}</span>
+      <button class="card-save-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleSave('${drink.idDrink}', this)" title="${isSaved ? 'Remove from saved' : 'Save cocktail'}">
+        ${isSaved ? SVG_HEART_SAVED : SVG_BOOKMARK}
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="card-name">${drink.strDrink || 'Unknown Drink'}</div>
+      <div class="card-glass">${SVG_GLASS} ${drink.strGlass || 'Any glass'}</div>
+      <div class="card-tags">
+        ${drink.strAlcoholic ? `<span class="mini-tag">${drink.strAlcoholic}</span>` : ''}
+        ${drink.strCategory ? `<span class="mini-tag">${drink.strCategory}</span>` : ''}
+      </div>
+      <div class="card-actions">
+        <button class="btn-view" onclick="event.stopPropagation(); openDrinkModal('${drink.idDrink}')">View Recipe</button>
+      </div>
+    </div>`;
+  card.addEventListener('click', () => openDrinkModal(drink.idDrink));
+  return card;
+}
+
+function showSkeletons() {
+  const grid = document.getElementById('drinks-grid');
+  grid.innerHTML = Array(8).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line shorter"></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('results-count').textContent = 'Loading cocktails...';
+  document.getElementById('load-more-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════
+// VIEW TOGGLE
+// ══════════════════════════════════
+function setView(view) {
+  currentView = view;
+  const grid = document.getElementById('drinks-grid');
+  grid.classList.toggle('list-view', view === 'list');
+  grid.querySelectorAll('.drink-card').forEach(c => {
+    c.classList.toggle('list-view', view === 'list');
+  });
+  document.getElementById('grid-btn').classList.toggle('active', view === 'grid');
+  document.getElementById('list-btn').classList.toggle('active', view === 'list');
+}
+
+// ══════════════════════════════════
+// MODAL
+// ══════════════════════════════════
+async function openDrinkModal(id) {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Show loading state
+  document.getElementById('modal-title').textContent = 'Loading...';
+  document.getElementById('modal-ingredients').innerHTML = '';
+  document.getElementById('modal-instructions').textContent = '';
+  document.getElementById('similar-section').style.display = 'none';
+
+  // Check local mocktail DB first
+  let drink = MOCKTAIL_DB.find(m => m.idDrink === id) || null;
+  if (!drink) drink = await getDrinkById(id);
+  if (!drink) { closeModal(); return; }
+
+  currentModalDrink = drink;
+
+  document.getElementById('modal-img').src = drink.strDrinkThumb;
+  document.getElementById('modal-img').alt = drink.strDrink;
+  document.getElementById('modal-cat').textContent = drink.strCategory || 'Cocktail';
+  document.getElementById('modal-title').textContent = drink.strDrink;
+
+  // Meta
+  document.getElementById('modal-meta').innerHTML = `
+    <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 2h8l-1 7H9L8 2z"/><path d="M9 9c0 0-1 3.5 3 6s3 7 3 7"/><path d="M15 9c0 0 1 3.5-3 6s-3 7-3 7"/><line x1="6" y1="22" x2="18" y2="22"/></svg> ${drink.strGlass || 'Any glass'}</span>
+    <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${drink.strAlcoholic || ''}</span>
+    ${drink.strIBA ? `<span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${drink.strIBA}</span>` : ''}
+  `;
+
+  // Ingredients
+  const ingList = document.getElementById('modal-ingredients');
+  ingList.innerHTML = '';
+  for (let i = 1; i <= 15; i++) {
+    const ing = drink[`strIngredient${i}`];
+    const measure = drink[`strMeasure${i}`];
+    if (!ing) break;
+    const div = document.createElement('div');
+    div.className = 'ingredient-item';
+    div.innerHTML = `
+      <img class="ingredient-img"
+        src="https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ing)}-Small.png"
+        alt="${ing}" onerror="this.src='https://via.placeholder.com/36/FFE8EE/FF6B9D?text=🌿'">
+      <div>
+        <div class="ingredient-name">${ing}</div>
+        ${measure ? `<div class="ingredient-measure">${measure.trim()}</div>` : ''}
+      </div>`;
+    ingList.appendChild(div);
+  }
+
+  document.getElementById('modal-instructions').textContent =
+    drink.strInstructions || 'No instructions available.';
+
+  // Save state
+  const isSaved = savedDrinks.some(s => s.idDrink === drink.idDrink);
+  const saveBtn = document.getElementById('modal-save-btn');
+  saveBtn.textContent = isSaved ? '❤️' : '🔖';
+  saveBtn.classList.toggle('saved', isSaved);
+
+  // Load similar by category
+  loadSimilarDrinks(drink.strCategory, drink.idDrink);
+}
+
+async function loadSimilarDrinks(category, excludeId) {
+  if (!category) return;
+  try {
+    const r = await fetch(`${API}/filter.php?c=${encodeURIComponent(category)}`);
+    const d = await r.json();
+    const similar = (d.drinks || []).filter(drink => drink.idDrink !== excludeId).slice(0, 8);
+    if (!similar.length) return;
+
+    const container = document.getElementById('similar-drinks');
+    container.innerHTML = similar.map(drink => `
+      <div class="similar-card" onclick="openDrinkModal('${drink.idDrink}')">
+        <img class="similar-img" src="${drink.strDrinkThumb}/preview" alt="${drink.strDrink}"
+          onerror="this.src='https://via.placeholder.com/120x100/FFE8EE/FF6B9D?text=🍹'" loading="lazy">
+        <div class="similar-name">${drink.strDrink}</div>
+      </div>`).join('');
+    document.getElementById('similar-section').style.display = 'block';
+  } catch {}
+}
+
+function closeModal(event) {
+  if (event && event.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModalDrink = null;
+}
+
+function toggleSaveFromModal() {
+  if (!currentModalDrink) return;
+  const id = currentModalDrink.idDrink;
+  const isSaved = savedDrinks.some(s => s.idDrink === id);
+  if (isSaved) {
+    savedDrinks = savedDrinks.filter(s => s.idDrink !== id);
+    document.getElementById('modal-save-btn').textContent = '🔖';
+    document.getElementById('modal-save-btn').classList.remove('saved');
+    showToast('Removed from saved');
+  } else {
+    savedDrinks.push({
+      idDrink: id,
+      strDrink: currentModalDrink.strDrink,
+      strDrinkThumb: currentModalDrink.strDrinkThumb,
+      strCategory: currentModalDrink.strCategory
+    });
+    document.getElementById('modal-save-btn').textContent = '❤️';
+    document.getElementById('modal-save-btn').classList.add('saved');
+    showToast('Saved! 🍹');
+  }
+  persistSaved();
+  updateSavedBadge();
+  updateCardSaveBtn(id, !isSaved);
+}
+
+// ══════════════════════════════════
+// SAVE SYSTEM
+// ══════════════════════════════════
+function toggleSave(id, btn) {
+  const isSaved = savedDrinks.some(s => s.idDrink === id);
+  if (isSaved) {
+    savedDrinks = savedDrinks.filter(s => s.idDrink !== id);
+    if (btn) { btn.textContent = '🔖'; btn.classList.remove('saved'); }
+    showToast('Removed from saved');
+  } else {
+    // Find drink info
+    const drink = filteredDrinks.find(d => d.idDrink === id) ||
+                  allDrinks.find(d => d.idDrink === id);
+    if (drink) {
+      savedDrinks.push({
+        idDrink: drink.idDrink,
+        strDrink: drink.strDrink,
+        strDrinkThumb: drink.strDrinkThumb,
+        strCategory: drink.strCategory || ''
+      });
+    }
+    if (btn) { btn.textContent = '❤️'; btn.classList.add('saved'); }
+    showToast('Saved! ❤️');
+  }
+  persistSaved();
+  updateSavedBadge();
+  renderDrawer();
+}
+
+function updateCardSaveBtn(id, saved) {
+  document.querySelectorAll('.drink-card').forEach(card => {
+    const btn = card.querySelector('.card-save-btn');
+    if (!btn) return;
+    const onclick = btn.getAttribute('onclick') || '';
+    if (onclick.includes(id)) {
+      btn.textContent = saved ? '❤️' : '🔖';
+      btn.classList.toggle('saved', saved);
+    }
+  });
+}
+
+function persistSaved() {
+  localStorage.setItem('wonderdrinks_saved', JSON.stringify(savedDrinks));
+}
+
+function updateSavedBadge() {
+  const badge = document.getElementById('saved-badge');
+  badge.textContent = savedDrinks.length;
+  badge.style.display = savedDrinks.length > 0 ? 'block' : 'none';
+}
+
+// ══════════════════════════════════
+// DRAWER
+// ══════════════════════════════════
+function toggleSavedDrawer() {
+  const drawer = document.getElementById('saved-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+  document.body.style.overflow = isOpen ? '' : 'hidden';
+  if (!isOpen) renderDrawer();
+}
+
+function renderDrawer() {
+  const body = document.getElementById('drawer-body');
+  if (!savedDrinks.length) {
+    body.innerHTML = `
+      <div class="drawer-empty">
+        <div class="drawer-empty-icon">🍹</div>
+        <div class="drawer-empty-text">No saved cocktails yet.<br>Tap 🔖 on any drink to save it here!</div>
+      </div>`;
+    return;
+  }
+  body.innerHTML = savedDrinks.map(drink => `
+    <div class="saved-item" onclick="openDrinkModal('${drink.idDrink}')">
+      <img class="saved-item-img"
+        src="${drink.strDrinkThumb}/preview" alt="${drink.strDrink}"
+        onerror="this.src='https://via.placeholder.com/60/FFE8EE/FF6B9D?text=🍹'" loading="lazy">
+      <div class="saved-item-info">
+        <div class="saved-item-name">${drink.strDrink}</div>
+        <div class="saved-item-cat">${drink.strCategory || 'Cocktail'}</div>
+      </div>
+      <button class="saved-item-remove" onclick="event.stopPropagation(); removeSaved('${drink.idDrink}')" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function removeSaved(id) {
+  savedDrinks = savedDrinks.filter(s => s.idDrink !== id);
+  persistSaved();
+  updateSavedBadge();
+  renderDrawer();
+  updateCardSaveBtn(id, false);
+  showToast('Removed');
+}
+
+function clearAllSaved() {
+  if (!savedDrinks.length) { showToast('Nothing saved yet'); return; }
+  savedDrinks = [];
+  persistSaved();
+  updateSavedBadge();
+  renderDrawer();
+  // Update all cards
+  document.querySelectorAll('.card-save-btn.saved').forEach(btn => {
+    btn.textContent = '🔖';
+    btn.classList.remove('saved');
+  });
+  showToast('Cleared all saved cocktails');
+}
+
+// ══════════════════════════════════
+// RANDOM
+// ══════════════════════════════════
+async function openRandomCocktail() {
+  const drink = await getRandomDrink();
+  if (drink) openDrinkModal(drink.idDrink);
+}
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════
+// UTILS
+// ══════════════════════════════════
+function scrollToSearch() {
+  document.getElementById('search-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Keyboard close modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('modal-overlay').classList.contains('open')) closeModal(null, true);
+    if (document.getElementById('saved-drawer').classList.contains('open')) toggleSavedDrawer();
+  }
+});
+
+// Force modal close on overlay click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    this.classList.remove('open');
+    document.body.style.overflow = '';
+    currentModalDrink = null;
+  }
+});
+</script>
+</body>
+</html>
