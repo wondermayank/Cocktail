@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WonderMayank Drinks — Cocktail Finder</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700;800;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
@@ -1741,6 +1741,18 @@
 <script src="mocktails_db.js"></script>
 <script>
 // ══════════════════════════════════
+// HELPERS
+// ══════════════════════════════════
+function thumbUrl(url) {
+  if (!url) return '';
+  // Only append /preview for CocktailDB CDN URLs — not external/local URLs
+  if (url.startsWith('https://www.thecocktaildb.com/') || url.startsWith('http://www.thecocktaildb.com/')) {
+    return url + '/preview';
+  }
+  return url;
+}
+
+// ══════════════════════════════════
 // STATE
 // ══════════════════════════════════
 const API = 'https://www.thecocktaildb.com/api/json/v1/1';
@@ -1996,7 +2008,7 @@ function createDrinkCard(drink) {
   card.className = `drink-card ${currentView === 'list' ? 'list-view' : ''}`;
   card.innerHTML = `
     <div class="card-img-wrap">
-      <img class="card-img" src="${drink.strDrinkThumb}/preview" alt="${drink.strDrink}"
+      <img class="card-img" src="${thumbUrl(drink.strDrinkThumb)}" alt="${drink.strDrink}"
         loading="lazy" onerror="this.src='https://placehold.co/300x220/FFE8EE/FF6B9D?text=No+Image'">
       <span class="category-tag">${drink.strCategory || drink.strAlcoholic || 'Cocktail'}</span>
       <button class="card-save-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleSave('${drink.idDrink}', this)" title="${isSaved ? 'Remove from saved' : 'Save cocktail'}">
@@ -2008,7 +2020,7 @@ function createDrinkCard(drink) {
       <div class="card-glass">${SVG_GLASS} ${drink.strGlass || 'Any glass'}</div>
       <div class="card-tags">
         ${drink.strAlcoholic ? `<span class="mini-tag">${drink.strAlcoholic}</span>` : ''}
-        ${drink.strCategory ? `<span class="mini-tag">${drink.strCategory}</span>` : ''}
+        ${drink.strCategory && drink.strCategory !== 'Non_Alcoholic' && drink.strCategory !== drink.strAlcoholic ? `<span class="mini-tag">${drink.strCategory}</span>` : ''}
       </div>
       <div class="card-actions">
         <button class="btn-view" onclick="event.stopPropagation(); openDrinkModal('${drink.idDrink}')">View Recipe</button>
@@ -2124,7 +2136,7 @@ async function loadSimilarDrinks(category, excludeId) {
     const container = document.getElementById('similar-drinks');
     container.innerHTML = similar.map(drink => `
       <div class="similar-card" onclick="openDrinkModal('${drink.idDrink}')">
-        <img class="similar-img" src="${drink.strDrinkThumb}/preview" alt="${drink.strDrink}"
+        <img class="similar-img" src="${thumbUrl(drink.strDrinkThumb)}" alt="${drink.strDrink}"
           onerror="this.src='https://via.placeholder.com/120x100/FFE8EE/FF6B9D?text=🍹'" loading="lazy">
         <div class="similar-name">${drink.strDrink}</div>
       </div>`).join('');
@@ -2241,7 +2253,7 @@ function renderDrawer() {
   body.innerHTML = savedDrinks.map(drink => `
     <div class="saved-item" onclick="openDrinkModal('${drink.idDrink}')">
       <img class="saved-item-img"
-        src="${drink.strDrinkThumb}/preview" alt="${drink.strDrink}"
+        src="${thumbUrl(drink.strDrinkThumb)}" alt="${drink.strDrink}"
         onerror="this.src='https://via.placeholder.com/60/FFE8EE/FF6B9D?text=🍹'" loading="lazy">
       <div class="saved-item-info">
         <div class="saved-item-name">${drink.strDrink}</div>
