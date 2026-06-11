@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+
+<defs>
+<linearGradient id="drink" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#FFD84D"/>
+<stop offset="100%" stop-color="#FF9800"/>
+</linearGradient>
+</defs>
+
+<!-- Background -->
+<rect width="64" height="64" rx="18" fill="#17001F"/>
+
+<!-- Glass -->
+<path
+d="M18 16H46L37 31H27L18 16Z"
+fill="url(#drink)"
+stroke="white"
+stroke-width="2"/>
+
+<!-- Stem -->
+<rect
+x="30"
+y="31"
+width="4"
+height="12"
+rx="2"
+fill="white"/>
+
+<!-- Base -->
+<rect
+x="22"
+y="46"
+width="20"
+height="3"
+rx="2"
+fill="white"/>
+
+<!-- Straw -->
+<path
+d="M36 12L42 22"
+stroke="#FF4FD8"
+stroke-width="3"
+stroke-linecap="round"/>
+
+<!-- Lemon -->
+<circle
+cx="44"
+cy="15"
+r="5"
+fill="#FFE96A"/>
+
+</svg>
